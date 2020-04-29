@@ -95,6 +95,9 @@ void HYT131::reading (int& temp, int& humi, byte (*delayFun)(word ms)) {
 */
 
 void emulate_hyt313(int howMany){
+    // First print our address if we receive something
+    Serial.println(cur_address);
+    Serial.println("");
     // Print whatever we receive
     while(1 < Wire.available()) // loop through all but the last
     {
@@ -102,7 +105,8 @@ void emulate_hyt313(int howMany){
         Serial.print(c);         // print the character
     }
     int x = Wire.read();    // receive byte as an integer
-    Serial.println(x);  
+    Serial.println(x);
+    Serial.println("");
     // TODO
 
     uint16_t humid_v = humidity_to_14_bit(cur_address); //TODO
