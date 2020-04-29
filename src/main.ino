@@ -51,6 +51,8 @@ uint16_t temperature_to_14_bit(int humidity_tenth_percent){
 }
 
 void setup(){
+    
+    Serial.begin(9600);
 
 }
 
