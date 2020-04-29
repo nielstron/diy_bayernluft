@@ -60,7 +60,7 @@ void loop(){
     // emulates being hyt for any address for 5 seconds
     for(int address = 0x0; address < 0x7F; address++){
         Wire.begin((char) address); // join I2C bus
-        Wire.onReceive(emulate_hyt313);
+        Wire.onRequest(emulate_hyt313);
         cur_address = address;
         Serial.println(cur_address);
 
@@ -97,7 +97,7 @@ void HYT131::reading (int& temp, int& humi, byte (*delayFun)(word ms)) {
 }
 */
 
-void emulate_hyt313(int howMany){
+void emulate_hyt313(){
     // First print our address if we receive something
     Serial.println(cur_address);
     Serial.println("");
@@ -114,13 +114,13 @@ void emulate_hyt313(int howMany){
 
     uint16_t humid_v = humidity_to_14_bit(cur_address); //TODO
     uint16_t temp_v = temperature_to_14_bit(cur_address); // TODO
-    switch(howMany){
-        case 1:
+    //switch(howMany){
+    //    case 1:
         // One byte is for MR
         // start measuring cycle
-        break;
-        case 2:
-        case 3:
+    //    break;
+    //    case 2:
+     //   case 3:
         // Two bytes is for capacitance = humidity data only
         // Three bytes is for capacitance & temperature data
         // TODO what value should the two status bits have? both one?
@@ -128,5 +128,5 @@ void emulate_hyt313(int howMany){
         Wire.write(humidity_i2c_format_low(humid_v));
         Wire.write(temperature_i2c_format_high(humid_v));
         Wire.write(temperature_i2c_format_low(humid_v));
-    }
+    //}
 }
