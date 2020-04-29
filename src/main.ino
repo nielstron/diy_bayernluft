@@ -28,7 +28,7 @@ uint8_t temperature_i2c_format_high(uint16_t temperature_strechted){
 
 // Convert tenth percents to 14 bit representation
 uint16_t humidity_to_14_bit(double humidity_tenth_percent){
-    return (humidity_tenth_percent / 1000) * (1<<14)
+    return (humidity_tenth_percent / 1000) * (1<<14);
 }
 
 // Convert tenth percents to 14 bit representation
@@ -40,7 +40,7 @@ uint16_t humidity_to_14_bit(int humidity_tenth_percent){
 
 // Convert tenth of temperature between -40 and 125 deg C to 14 bit representation
 uint16_t temperature_to_14_bit(double humidity_tenth_percent){
-    return (humidity_tenth_percent / 1650) * (1<<14)
+    return (humidity_tenth_percent / 1650) * (1<<14);
 }
 
 // Convert tenth of temperature between -40 and 125 deg C to 14 bit representation
@@ -62,7 +62,7 @@ void loop(){
         cur_address = address;
 
         // wait for bayernlüfter to ask for values
-        for(int i = 0; i < 50; i++){
+        for(int i = 0; i < 20; i++){
             delay(100);
         }
     }
