@@ -62,6 +62,7 @@ void loop(){
         Wire.begin((char) address); // join I2C bus
         Wire.onReceive(emulate_hyt313);
         cur_address = address;
+        Serial.println(cur_address);
 
         // wait for bayernlüfter to ask for values
         for(int i = 0; i < 20; i++){
