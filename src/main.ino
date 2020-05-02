@@ -1,8 +1,9 @@
 #include <Wire.h>
-#include <sht31_util.h>
-#include <hyt313_util.h>
-#include <config.h>
 
+#include "util_sht31.h"
+#include "util_hyt313.h"
+
+#include "user_config.h"
 
 // Raw temperature to be emulated comes in integer format
 // in tenths of a degree Celsius

@@ -1,5 +1,5 @@
-const int polynomial = 0x131;
-const int poly_degree = 8;
+const uint32_t polynomial = 0x131;
+const uint16_t poly_degree = 8;
 
 uint8_t Crc8_2byte(uint16_t data) {
     uint32_t cur_data = ((uint16_t) data) << poly_degree; // 16 bit data, padded with 8 zeroes
