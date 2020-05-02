@@ -1,132 +1,88 @@
 #include <Wire.h>
 
-// Problem: can only receive as one address
-// at a time
-// Solution: Stays at one address for 5 seconds, then switches to next address
+#ifdef SENSOR_A
+    #define ITC_ADRESS 0x44
+#else
+    #define ITC_ADDRESS 0x45
+#endif
 
 int cur_address;
 
-// brings the lower 8 bits of a 14 bit humidity value to the correct format
-uint8_t humidity_i2c_format_low(uint16_t humidity_strechted){
-    return 0xFF & humidity_strechted;
+const int polynomial = 0x131;
+const int poly_degree = 8;
+// init = 0xFF;
+
+uint8_t Crc8_2byte(uint16_t data) {
+    uint32_t cur_data = ((uint16_t) data) << poly_degree; // 16 bit data, padded with 8 zeroes
+    // init = 0xFF <=> invert first 8 bit
+    cur_data ^= 0xFF0000;
+    // shift polynomial left s.t. leftmost bit (at pos poly_degree ) is at position 23 (0-indexed)
+    uint32_t cur_poly = (polynomial) << (23 - poly_degree);
+    for(int i = 23; i > poly_degree; i--){
+        // if leftmost bit set
+        if(cur_data >> i){
+            cur_data ^= cur_poly;
+        }
+        cur_poly = cur_poly >> 1;
+    }
+    // return remaining 8 bits of data
+    return (uint8_t) cur_data;
 }
 
-// brings the upper 8 bits of a 14 bit humidity value to the correct format
-uint8_t humidity_i2c_format_high(uint16_t humidity_strechted){
-    return 0x3F & (humidity_strechted >> 8);
+// Convert percents to 16 bit representation
+uint16_t humidity_to_16_bit(double humidity_percent){
+    return (humidity_percent / 100) * (1<<16 - 1);
 }
 
-// brings the lower 8 bits of a 14 bit temperature value to the correct format
-uint8_t temperature_i2c_format_low(uint16_t temperature_strechted){
-    return (0x3F & temperature_strechted) << 2;
+// Convert percents to 14 bit representation
+uint16_t humidity_to_16_bit(uint32_t humidity_percent){
+    // h * (2^16-1) / 100
+    // no information lost since shifting left by 16 causes no overflow
+    // (bc log2(100) << 16)
+    return (humidity_percent << 16 - humidity_percent)/100;
 }
 
-// brings the upper 8 bits of a 14 bit temperature value to the correct format
-uint8_t temperature_i2c_format_high(uint16_t temperature_strechted){
-    return 0xFF & (temperature_strechted >> 6);
+// Convert temperature between -40 and 125 deg C to 14 bit representation
+uint16_t temperature_to_16_bit(double temperature){
+    return ((temperature +45) / 175) * (1<<16 - 1);
 }
 
-// Convert tenth percents to 14 bit representation
-uint16_t humidity_to_14_bit(double humidity_tenth_percent){
-    return (humidity_tenth_percent / 1000) * (1<<14);
-}
-
-// Convert tenth percents to 14 bit representation
-uint16_t humidity_to_14_bit(int humidity_tenth_percent){
-    // h * 2^14 / 1000
-    // no info lost since 14 < 32/2, so no bits are shoved "out"
-    return (humidity_tenth_percent << 14)/1000;
-}
-
-// Convert tenth of temperature between -40 and 125 deg C to 14 bit representation
-uint16_t temperature_to_14_bit(double humidity_tenth_percent){
-    return (humidity_tenth_percent / 1650) * (1<<14);
-}
-
-// Convert tenth of temperature between -40 and 125 deg C to 14 bit representation
-uint16_t temperature_to_14_bit(int humidity_tenth_percent){
-    // h * 2^14 / 1650
-    // no info lost since 14 < 32/2, so no bits are shoved "out"
-    return (humidity_tenth_percent << 14)/1650;
+// Convert temperature between -40 and 125 deg C to 14 bit representation
+uint16_t temperature_to_16_bit(uint32_t temperature){
+    // (t+45) * (2^16-1) / 175
+    return ((temperature+45) << 16 - (temperature+45))/175;
 }
 
 void setup(){
     
     Serial.begin(9600);
-
+    // emulates being sht31
+    cur_address = ITC_ADDRESS;
+    Wire.begin((char) cur_address); // join I2C bus
+    Wire.onRequest(emulate_sht31);
+    Serial.println(cur_address);
 }
 
 void loop(){
-    // emulates being hyt for any address for 5 seconds
-    for(int address = 0x0; address < 0x7F; address++){
-        Wire.begin((char) address); // join I2C bus
-        Wire.onRequest(emulate_hyt313);
-        cur_address = address;
-        Serial.println(cur_address);
-
-        // wait for bayernlüfter to ask for values
-        for(int i = 0; i < 20; i++){
-            delay(100);
-        }
-    }
+    delay(100);
 }
 
-/* From JeeLib
-void HYT131::reading (int& temp, int& humi, byte (*delayFun)(word ms)) {
-    // Start measurement
-    send();
-    stop();
-    
-    // Wait for completion (using user-supplied (low-power?) delay function)
-    if (delayFun)
-        delayFun(100);
-    else
-        delay(100);
-    
-    // Extract readings
-    receive();
-    uint16_t h = (read(0) & 0x3F) << 8;
-    h |= read(0);
-    uint16_t t = read(0) << 6;
-    t |= read(1) >> 2;
-    
-    // convert 0..16383 to 0..100% (*10)
-    humi = (h * 1000L >> 14);
-    // convert 0..16383 to -40 .. 125 (*10)
-    temp = (t * 1650L >> 14) - 400;
-}
-*/
 
-void emulate_hyt313(){
-    // First print our address if we receive something
-    Serial.println(cur_address);
+void emulate_sht31(){
     Serial.println("");
     // Print whatever we receive
-    while(1 < Wire.available()) // loop through all but the last
+    while(0 < Wire.available()) // loop through all but the last
     {
         char c = Wire.read(); // receive byte as a character
         Serial.print(c);         // print the character
     }
-    int x = Wire.read();    // receive byte as an integer
-    Serial.println(x);
     Serial.println("");
     // TODO
 
-    uint16_t humid_v = humidity_to_14_bit(cur_address); //TODO
-    uint16_t temp_v = temperature_to_14_bit(cur_address); // TODO
-    //switch(howMany){
-    //    case 1:
-        // One byte is for MR
-        // start measuring cycle
-    //    break;
-    //    case 2:
-     //   case 3:
-        // Two bytes is for capacitance = humidity data only
-        // Three bytes is for capacitance & temperature data
-        // TODO what value should the two status bits have? both one?
-        Wire.write(humidity_i2c_format_high(0xC0 | humid_v));
-        Wire.write(humidity_i2c_format_low(humid_v));
-        Wire.write(temperature_i2c_format_high(humid_v));
-        Wire.write(temperature_i2c_format_low(humid_v));
-    //}
+    uint16_t hum = humidity_to_16_bit((uint32_t) cur_address);
+    uint16_t temp = temperature_to_16_bit((uint32_t) cur_address);
+    Wire.write(hum);
+    Wire.write(Crc8_2byte(hum));
+    Wire.write(temp);
+    Wire.write(Crc8_2byte(temp));
 }
