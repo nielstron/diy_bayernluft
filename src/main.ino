@@ -4,6 +4,14 @@
 #include <config.h>
 
 
+// Raw temperature to be emulated comes in integer format
+// in tenths of a degree Celsius
+#define INT_TEMP false
+
+// Raw humidity to be emulated comes in integer format
+// in tenths of a percent relative humidity
+#define INT_HUMIDITY false
+
 #if INT_TEMP
     typedef uint32_t temp_format;
 #else
