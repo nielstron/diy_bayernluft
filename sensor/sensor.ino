@@ -4,6 +4,8 @@
 #include "util_hyt313.h"
 
 #include "user_config.h"
+//DHT (22)
+#include <DHT.h>
 
 // Raw temperature to be emulated comes in integer format
 // in tenths of a degree Celsius
@@ -29,6 +31,9 @@
 temp_format cur_temperature = 20;
 humidity_format cur_humidity = 50;
 
+// DHT sensor connected at pin 12 and model number 22
+DHT dht(12, 22);
+
 void setup(){
     
     #if VERBOSE
@@ -38,10 +43,26 @@ void setup(){
     // emulates being sht31
     Wire.begin(ITC_ADDRESS); // join I2C bus
     Wire.onRequest(emulate_sht31);
+
+    // Set up DHT22 sensor
+    dht.begin();
 }
 
 void loop(){
-    delay(100);
+    if (isnan(dht.readTemperature())) {
+        Serial.print("Error reading temperature DHT ");
+    }
+    else {
+        cur_temperature = dht.readTemperature();
+    }
+    if (isnan(dht.readHumidity())) {
+        Serial.print("Error reading humidity DHT ");
+    }
+    else{
+        cur_humidity = dht.readHumidity();
+    }
+    // One reading every second
+    delay(1000);
 }
 
 
@@ -68,26 +89,4 @@ void emulate_sht31(){
     Wire.write((uint8_t)(hum && 0x00FF));
     Wire.write(Crc8_2byte(hum));
 
-}
-
-
-void emulate_hyt313(){
-    #if VERBOSE
-        Serial.println("==================================");
-        // Print whatever we receive
-        while(0 < Wire.available()) // loop through all but the last
-        {
-            char c = Wire.read(); // receive byte as a character
-            Serial.print(c, HEX);         // print the character
-        }
-        Serial.println("==================================");
-    #endif
-
-    // untested!
-    uint16_t humid_v = humidity_to_14_bit(cur_humidity);
-    uint16_t temp_v = temperature_to_14_bit(cur_temperature);
-    Wire.write(humidity_i2c_format_high(0xC0 | humid_v));
-    Wire.write(humidity_i2c_format_low(humid_v));
-    Wire.write(temperature_i2c_format_high(humid_v));
-    Wire.write(temperature_i2c_format_low(humid_v));
 }
