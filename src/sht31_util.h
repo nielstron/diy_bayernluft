@@ -20,23 +20,23 @@ uint8_t Crc8_2byte(uint16_t data) {
 
 // Convert percents to 16 bit representation
 uint16_t humidity_to_16_bit(double humidity_percent){
-    return (humidity_percent / 100) * (1<<16);
+    return (humidity_percent / 100) * (65536 - 1);
 }
 
 // Convert temperature between -45 and 125 deg C to 16 bit representation
 uint16_t temperature_to_16_bit(double temperature){
-    return ((temperature +45) / 175) * (1<<16);
+    return ((temperature +45) / 175) * (65536 - 1);
 }
 // Convert percents to 16 bit representation
 uint16_t humidity_to_16_bit(uint32_t humidity_percent){
     // h * (2^16-1) / 100
     // no information lost since shifting left by 16 causes no overflow
     // (bc log2(100) << 16)
-    return (humidity_percent*((1<< 16) - 1))/100;
+    return (humidity_percent*(65536 - 1))/100;
 }
 
 // Convert temperature between -40 and 125 deg C to 16 bit representation
 uint16_t temperature_to_16_bit(uint32_t temperature){
     // (t+45) * (2^16-1) / 175
-    return ((temperature+45) *((1<< 16) - 1))/175;
+    return ((temperature+45) *(65536 - 1))/175;
 }

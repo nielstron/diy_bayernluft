@@ -20,7 +20,6 @@
 temp_format cur_temperature = 20;
 humidity_format cur_humidity = 50;
 
-
 void setup(){
     
     #if VERBOSE
