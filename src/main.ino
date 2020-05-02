@@ -1,9 +1,9 @@
 #include <Wire.h>
 
-#ifdef SENSOR_A
+#ifdef SENSOR_RED
     #define ITC_ADRESS 0x44
 #else
-    #define ITC_ADDRESS 0x45
+    #define ITC_ADDRESS 0x44
 #endif
 
 int cur_address;
@@ -79,10 +79,12 @@ void emulate_sht31(){
     Serial.println("");
     Serial.println("====================");
 
-    uint16_t hum = humidity_to_16_bit((uint32_t) cur_address);
-    uint16_t temp = temperature_to_16_bit((uint32_t) cur_address);
-    Wire.write(hum);
+    uint16_t hum = humidity_to_16_bit((uint32_t) 50);
+    uint32_t temp = temperature_to_16_bit((uint32_t) 20);
+    Wire.write((uint8_t)(hum >> 8));
+    Wire.write((uint8_t)(hum && 0x00FF));
     Wire.write(Crc8_2byte(hum));
-    Wire.write(temp);
+    Wire.write((uint8_t)(temp >> 8));
+    Wire.write((uint8_t)(temp && 0x00FF));
     Wire.write(Crc8_2byte(temp));
 }
