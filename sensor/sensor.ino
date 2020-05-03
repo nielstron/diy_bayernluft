@@ -32,7 +32,7 @@ temp_format cur_temperature = 20;
 humidity_format cur_humidity = 50;
 
 // DHT sensor connected at pin 12 and model number 22
-DHT dht(12, 22);
+DHT dht(12, DHT22);
 
 void setup(){
     
@@ -49,17 +49,30 @@ void setup(){
 }
 
 void loop(){
-    if (isnan(dht.readTemperature())) {
-        Serial.print("Error reading temperature DHT ");
+    float dht_temp = dht.readTemperature();
+    if (isnan(dht_temp)) {
+        #if VERBOSE
+            Serial.println("Error reading temperature DHT ");
+        #endif
     }
     else {
-        cur_temperature = dht.readTemperature();
+        #if VERBOSE
+            Serial.println("Temperature: " + String(dht_temp) + " °C");
+        #endif
+        cur_temperature = dht_temp;
     }
-    if (isnan(dht.readHumidity())) {
-        Serial.print("Error reading humidity DHT ");
+
+    float dht_hum = dht.readHumidity();
+    if (isnan(dht_hum)) {
+        #if VERBOSE
+            Serial.print("Error reading humidity DHT ");
+        #endif
     }
     else{
-        cur_humidity = dht.readHumidity();
+        #if VERBOSE
+            Serial.println("Humidity: " + String(dht_temp) + " °C");
+        #endif
+        cur_humidity = dht_hum;
     }
     // One reading every second
     delay(1000);
