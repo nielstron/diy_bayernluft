@@ -1,3 +1,8 @@
+/*
+ * Configuration and settings for the combiled code
+ * that may change from flash to flash
+ */
+
 const int ITC_ADDRESS_RED = 0x44;
 const int ITC_ADDRESS_GREEN = 0x45;
 
