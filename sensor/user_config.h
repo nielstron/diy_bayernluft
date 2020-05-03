@@ -1,4 +1,4 @@
-const int ITC_ADRESS_RED = 0x44;
+const int ITC_ADDRESS_RED = 0x44;
 const int ITC_ADDRESS_GREEN = 0x45;
 
 // Compile code for the red (upper) sensor
