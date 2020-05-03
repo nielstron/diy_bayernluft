@@ -27,7 +27,7 @@ Have a look at the configuration in `config.h`. Compile twice, once with `ITC_AD
 
 ### Where can I find example setup code?
 
-Modified code that fits for a certain type of sensor can be found in the branches of this project, see for example [the code for using the DHT22](https://github.com/nielstron/diy_bayernluft/tree/dht22_example).
+Modified code that fits for a certain type of sensor can be found in the branches of this project, see for example [the code for using the DHT22](https://github.com/nielstron/diy_bayernluft/tree/example_dht22).
 
 ### FAQ
 
